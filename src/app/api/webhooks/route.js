@@ -35,6 +35,7 @@ export async function POST(req) {
         );
       } catch (error) {
         console.log("error creating user");
+        return new Response('Error Occured', {status:400});
       }
     }
 
@@ -44,6 +45,7 @@ export async function POST(req) {
         deleteUser(id);
       } catch (error) {
         console.log("error deleting user");
+        return new Response('Error Occured', {status:400});
       }
     }
 
