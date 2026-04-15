@@ -1,6 +1,7 @@
 import { verifyWebhook } from "@clerk/nextjs/webhooks";
 import { NextRequest } from "next/server";
 import { createOrUpdateUser, deleteUser } from "@/app/lib/actions/user";
+import { clerkClient } from "@clerk/nextjs/server";
 export async function POST(req) {
   try {
     const evt = await verifyWebhook(req);
@@ -25,7 +26,7 @@ export async function POST(req) {
         username,
       } = evt?.data;
       try {
-        createOrUpdateUser(
+        const user = await createOrUpdateUser(
           id,
           first_name,
           last_name,
@@ -33,19 +34,32 @@ export async function POST(req) {
           email_addresses,
           username,
         );
+
+        if (user || eventType === "user.created") {
+          try {
+            await clerkClient.users.updateUserMetadata(id, {
+              publicMetadata: {
+                userMongoId: user._id,
+              },
+            });
+          } catch (error) {
+            console.log("error");
+          }
+        }
       } catch (error) {
         console.log("error creating user");
-        return new Response('Error Occured', {status:400});
+        return new Response("Error Occured", { status: 400 });
       }
     }
 
     if (eventType === "user.deleted") {
       console.log("User deleted event");
+      const { id } = evt?.data;
       try {
         deleteUser(id);
       } catch (error) {
         console.log("error deleting user");
-        return new Response('Error Occured', {status:400});
+        return new Response("Error Occured", { status: 400 });
       }
     }
 
