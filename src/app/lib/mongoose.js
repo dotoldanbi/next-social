@@ -4,19 +4,14 @@ let initialized = false;
 
 export const connect = async () => {
   mongoose.set("strictQuery", true);
-  if (initialized) {
-    console.log("already mongoose connected");
-    return;
-  }
+
+  if (initialized) return;
 
   try {
-    await mongoose.connect(process.env.MONGODB_URI, {
-      useNewUrlParser: true,
-      useFindAndModify: false,
-      useCreteIndex: true,
-    });
+    await mongoose.connect(process.env.MONGODB_URI);
     initialized = true;
   } catch (error) {
-    console.log("Error conecting mongodb");
+    console.error("Error connecting mongodb", error);
+    throw error;
   }
 };
