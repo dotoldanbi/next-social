@@ -12,32 +12,46 @@ import {
 } from "firebase/storage";
 
 export default function Input() {
+  // clerk 유저상태
   const { user, isSignedIn, isLoaded } = useUser();
+console.log(user);
+  // 리액트 useRef
   const imagePickRef = useRef(null);
+
   const [imageFileUrl, setImageFileUrl] = useState();
   const [selectedFile, setSelectedFile] = useState();
   const [imageFileUploading, setImageFileUploading] = useState();
 
+  const [text, setText] = useState('');
+  const [postLoading, setPostLoading] = useState();
+
   const addImageToPost = (e) => {
     const file = e.target.files[0];
     if (file) {
+      // 파일을 받아서 파일과 파일URL 격납
       setSelectedFile(file);
       setImageFileUrl(URL.createObjectURL(file));
     }
   };
 
   useEffect(() => {
+    // selectedFile이 변경 시 업로드
     if (selectedFile) {
       uploadImageToStorage();
     }
   }, [selectedFile]);
 
   const uploadImageToStorage = () => {
+    // flag
     setImageFileUploading(true);
 
-    const storage = getStorage(app);
     const fileName = new Date().getTime() + "_" + selectedFile.name;
+
+    // 파이어베이스 스토리지
+    const storage = getStorage(app);
+    // 스토리지ref
     const storageRef = ref(storage, fileName);
+    // 업로드
     const uploadTask = uploadBytesResumable(storageRef, selectedFile);
 
     uploadTask.on(
@@ -55,16 +69,40 @@ export default function Input() {
       },
       () => {
         getDownloadURL(uploadTask.snapshot.ref).then((downloadUrl) => {
-            setImageFileUrl(downloadUrl);
-            setImageFileUploading(false);
+          setImageFileUrl(downloadUrl);
+          setImageFileUploading(false);
         });
-      }
+      },
     );
   };
 
   if (!isSignedIn || !isLoaded) {
     return null;
   }
+
+  const handleSubmit = async () => {
+    setPostLoading(true);
+    const response = await fetch("/api/post/create", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      
+      body: JSON.stringify({
+        userMongoId: user.publicMetadata.userMongoId,
+        name: user.fullName,
+        username: user.username,
+        text,
+        profileImg: user.imageUrl,
+        image: imageFileUrl,
+      }),
+    });
+    setPostLoading(false);
+    setText('');
+    setSelectedFile(null);
+    setImageFileUrl(null);
+    location.reload();
+  };
 
   return (
     <div className="flex border-b border-gray-200 p-3 space-x-3 w-full">
@@ -79,6 +117,8 @@ export default function Input() {
           className="w-full border-none outline-none tranking-wide min-h-[50px] text-gray-700"
           placeholder="What's happening"
           rows="2"
+          value={text}
+          onChange={(e) => setText(e.target.value)}
         ></textarea>
 
         {selectedFile && (
@@ -106,8 +146,9 @@ export default function Input() {
             onChange={addImageToPost}
           />
           <button
-            disabled
+            disabled={text.trim() === "" || postLoading || imageFileUploading}
             className="bg-blue-400 text-white px-4 py-1.5 rounded-full font-bold shadow-md hover:brightness-95 disabled:opacity-50"
+            onClick={handleSubmit}
           >
             Post
           </button>
