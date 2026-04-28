@@ -76,10 +76,7 @@ export default function Input() {
     );
   };
 
-  if (!isSignedIn || !isLoaded) {
-    return null;
-  }
-
+  
   const handleSubmit = async () => {
     setPostLoading(true);
     const response = await fetch("/api/post/create", {
@@ -103,7 +100,11 @@ export default function Input() {
     setImageFileUrl(null);
     location.reload();
   };
-
+  
+  if (!isSignedIn || !isLoaded) {
+    return null;
+  }
+  
   return (
     <div className="flex border-b border-gray-200 p-3 space-x-3 w-full">
       <img
