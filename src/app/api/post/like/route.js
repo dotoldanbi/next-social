@@ -14,6 +14,7 @@ export const PUT = async (req) => {
     }
 
     const post = await Post.findById(data.postId);
+
     if (post.likes.includes(user.publicMetadata.userMongoId)) {
       const updatePost = await Post.findByIdAndUpdate(
         data.postId,

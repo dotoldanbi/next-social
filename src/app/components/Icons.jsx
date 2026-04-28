@@ -11,22 +11,24 @@ import { useState, useEffect } from "react";
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 
-export default function Icons() {
-  const [isLiked, setISLiked] = useState(false);
+export default function Icons({post, id}) {
+  const [isLiked, setIsLiked] = useState(false);
   const [likes, setLikes] = useState(postMessage.likes || []); // array
 
   const { user } = useUser();
   const router = useRouter();
 
-  const likePost = () => {
+  const likePost = (post) => {
+    
     if (!user) {
       return router.push("/sign-in");
     }
 
+    
     const like = fetch("/api/post/like", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ postId: post._id }),
+      body: JSON.stringify({ postId: id }),
     });
 
     if (like && isLiked) {
@@ -42,27 +44,27 @@ export default function Icons() {
 
   useEffect(() => {
     if (user && likes.includes(user.publicMetadata.userMongoId)) {
-      setISLiked(true);
+      setIsLiked(true);
     } else {
-      setISLiked(false);
+      setIsLiked(false);
     }
   }, [likes, user]);
 
   return (
     <div className="flex justify-start gap-5 p-2 text-gray-500">
       <HiOutlineChat className="h-8 w-8 cursor-pointer rounded-full transition duration-500 ease-in-out p-2 hover:text-sky-500 hover:bg-sky-100" />
-
+        
       <div className="flex items-center">
         {isLiked ? (
           <HiHeart
-            onClike={likePost}
+            onClick={likePost}
             className="h-8 w-8 cursor-pointer rounded-full transition duration-500 ease-in-out p-2 text-red-600 hover:text-red-500 hover:bg-red-100"
           />
         ) : (
-          <HiOutlineHeart className="h-8 w-8 cursor-pointer rounded-full transition duration-500 ease-in-out p-2 hover:text-sky-500 hover:bg-sky-100" />
+          <HiOutlineHeart onClick={likePost} className="h-8 w-8 cursor-pointer rounded-full transition duration-500 ease-in-out p-2 hover:text-sky-500 hover:bg-sky-100" />
         )}
 
-        {likes.lenth > 0 && (
+        {likes.length > 0 && (
           <span className={`text-xs ${isLiked && "text-red-600"}`}>
             {likes.length}
           </span>
