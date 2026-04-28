@@ -16,7 +16,7 @@ export const POST = async (req) => {
       });
     }
 
-    console.log("!!!!!!!!!!!!!!!!");
+    
     data.userMongoId = "69df0a84cce1611d9546fab5";
     
     

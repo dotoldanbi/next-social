@@ -14,7 +14,7 @@ import {
 export default function Input() {
   // clerk 유저상태
   const { user, isSignedIn, isLoaded } = useUser();
-console.log(user);
+
   // 리액트 useRef
   const imagePickRef = useRef(null);
 

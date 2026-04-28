@@ -3,8 +3,8 @@ import React from "react";
 import Link from "next/link";
 import { HiDotsHorizontal } from "react-icons/hi";
 import moment from "moment";
-
-export default function Post() {
+import Icons from "./Icons";
+export default function Post({ post }) {
   return (
     <div className="flex p-3 border-b border-gray-200 w-full hover:bg-gray-50">
       <Link href={`/users/${post?.username}`}>
@@ -29,8 +29,10 @@ export default function Post() {
           <HiDotsHorizontal className="text-sm" />
         </div>
         <Link href={`/posts/${post?._id}`}>
+          <p className="text-gray-800 text-sm my-3 w-full">{post?.text}</p>
           <img src={post?.image} className="rounded-2xl mr-2" />
         </Link>
+        <Icons post={post} id={post._id} />
       </div>
     </div>
   );
