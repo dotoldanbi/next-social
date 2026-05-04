@@ -5,6 +5,8 @@ import "../globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import { ClerkLoading, ClerkLoaded } from "@clerk/nextjs";
 import Loader from "../components/Loader";
+import CommentModal from "../components/CommentModal";
+
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,22 +31,24 @@ export default function RootLayout({ children }) {
         className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
       >
         <body className="min-h-full flex flex-col">
-          <ClerkLoading>
-            <Loader />
-          </ClerkLoading>
+          
+            <ClerkLoading>
+              <Loader />
+            </ClerkLoading>
 
-          <ClerkLoaded>
-            <div className="flex justify-between max-w-6xl mx-auto">
-              <div className="hidden sm:inline border-r h-screen sticky top-0">
-                <LeftSideBar />
+            <ClerkLoaded>
+              <div className="flex justify-between max-w-6xl mx-auto">
+                <div className="hidden sm:inline border-r h-screen sticky top-0">
+                  <LeftSideBar />
+                </div>
+                <div className="w-2xl flex-1">{children}</div>
+                <div className="lg:flex-col p-3 h-screen border-l hidden lg:flex w-[24rem]">
+                  <RightSidebar />
+                </div>
               </div>
-              <div className="w-2xl flex-1">{children}</div>
-              <div className="lg:flex-col p-3 h-screen border-l hidden lg:flex w-[24rem]">
-                <RightSidebar />
-              </div>
-            </div>
-          </ClerkLoaded>
-
+            </ClerkLoaded>
+            <CommentModal />
+          
         </body>
       </html>
     </ClerkProvider>

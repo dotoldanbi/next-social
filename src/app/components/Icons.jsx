@@ -10,10 +10,17 @@ import {
 import { useState, useEffect } from "react";
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
+import { useModalStore, usePostIdStore } from "@/store/store";
 
 export default function Icons({ post, id }) {
   const [isLiked, setIsLiked] = useState(false);
   const [likes, setLikes] = useState(postMessage.likes || []); // array
+
+  const open = useModalStore((state) => state.open);
+  const setOpen = useModalStore((state) => state.setOpen);
+
+  const postId = usePostIdStore((state) => state.postId);
+  const setPostId = usePostIdStore((state) => state.setPostId);
 
   const { user } = useUser();
   const router = useRouter();
@@ -42,18 +49,18 @@ export default function Icons({ post, id }) {
 
   const deletePost = async (post) => {
     if (window.confirm("Are you sure you want to delete this post?")) {
-    //   if (user && user.publicMetadata.userMongoId === post.user) {
-        const res = await fetch("/api/post/delete", {
-          method: "DELETE",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ postId: id }),
-        });
-        if (res.status === 200) {
-          location.reload();
-        } else {
-          alert("error deleting post");
-        }
+      //   if (user && user.publicMetadata.userMongoId === post.user) {
+      const res = await fetch("/api/post/delete", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ postId: id }),
+      });
+      if (res.status === 200) {
+        location.reload();
+      } else {
+        alert("error deleting post");
       }
+    }
     // }
   };
 
@@ -67,7 +74,17 @@ export default function Icons({ post, id }) {
 
   return (
     <div className="flex justify-start gap-5 p-2 text-gray-500">
-      <HiOutlineChat className="h-8 w-8 cursor-pointer rounded-full transition duration-500 ease-in-out p-2 hover:text-sky-500 hover:bg-sky-100" />
+      <HiOutlineChat
+        onClick={() => {
+          if (!user) {
+            router.push("/sign-in");
+          } else {
+            setOpen(true);
+            setPostId(id);
+          }
+        }}
+        className="h-8 w-8 cursor-pointer rounded-full transition duration-500 ease-in-out p-2 hover:text-sky-500 hover:bg-sky-100"
+      />
 
       <div className="flex items-center">
         {isLiked ? (
