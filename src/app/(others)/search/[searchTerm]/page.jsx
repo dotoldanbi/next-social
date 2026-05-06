@@ -4,7 +4,7 @@ import { HiArrowLeft } from "react-icons/hi";
 
 export default async function SearchPage({ params }) {
   let data = null;
-  const searchTerm = await params.searchTerm;
+  const {searchTerm} = await params;
   try {
     const result = await fetch(process.env.URL + "api/user/search", {
       method: "POST",
