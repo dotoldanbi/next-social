@@ -8,9 +8,9 @@ export const POST = async (req) => {
     await connect();
     const data = await req.json();
 
-    if (!user) {
-      return new Response({ status: 401, body: "Unauthorized" });
-    }
+    // if (!user) {
+    //   return new Response({ status: 401, body: "Unauthorized" });
+    // }
 
     const post = await Post.findById(data.postId);
     if (!post) {

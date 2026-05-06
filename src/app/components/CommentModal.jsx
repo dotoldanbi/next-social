@@ -7,6 +7,8 @@ import React, { useEffect, useState } from "react";
 import moment from "moment";
 import { useUser } from "@clerk/nextjs";
 import Modal from "react-modal";
+import { Router } from "next/router";
+import { useRouter } from "next/navigation";
 
 export default function CommentModal() {
   const open = useModalStore((state) => state.open);
@@ -20,7 +22,7 @@ export default function CommentModal() {
   const [input, setInput] = useState("");
 
   const { user } = useUser();
-
+  const { router } = useRouter();
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -47,8 +49,36 @@ export default function CommentModal() {
   }, [postId]);
 
   const sendComment = async () => {
-    if (input.trim() === "") return;
-  }
+    if (!user) {
+      return Router.push("/sign-in");
+    }
+    try {
+      const res = await fetch("/api/post/comment", {
+        method: "PUT",
+        headers: { "Content-Type": "application/jsonb" },
+        body: JSON.stringify({
+          postId,
+          comment: input,
+          user: user.publicMetadata.userMongoId,
+          name: user.name,
+          username: user.username,
+          profileImg: user.image_url,
+        }),
+      });
+
+      // response ok
+      if (res.status === 200) {
+        setInput("");
+        setOpen(false);
+        router.push(`/post/${postId}`);
+        setTimeout(() => {
+          router.refresh();
+        }, 100);
+      }
+    } catch (error) {
+      console.error("Error sending comment:", error);
+    }
+  };
 
   return (
     <Modal
@@ -84,11 +114,15 @@ export default function CommentModal() {
             @{postLoading ? "username" : post?.username}
           </span>
         </div>
-        
-        <div className='flex p-3 space-x-3'>
-          <img src={user?.imageUrl} alt="user-img" className="h-11 w-11 rounded-full cursor-pointer hover:brightness-95" />
 
-          <div className='w-full divide-y divide-gray-200'>
+        <div className="flex p-3 space-x-3">
+          <img
+            src={user?.image_url}
+            alt="user-img"
+            className="h-11 w-11 rounded-full cursor-pointer hover:brightness-95"
+          />
+
+          <div className="w-full divide-y divide-gray-200">
             <div>
               <textarea
                 rows="2"
@@ -98,16 +132,18 @@ export default function CommentModal() {
                 onChange={(e) => setInput(e.target.value)}
               />
             </div>
-            
-            </div>
+          </div>
         </div>
         <p className="ml-12 text-[15px] sm:text-[16px] mb-2">
           {postLoading ? "Post content loading..." : post?.content}
         </p>
 
         <div className="flex items-center justify-end pt-2.5">
-          <button className="bg-blue-400 text-white px-4 py-1.5 rounded-full font-bold shadow-md hover:brightness-95 disabled:opacity-50"
-          disabled={input.trim() === "" || postLoading} onClick={sendComment}>
+          <button
+            className="bg-blue-400 text-white px-4 py-1.5 rounded-full font-bold shadow-md hover:brightness-95 disabled:opacity-50"
+            disabled={input.trim() === "" || postLoading}
+            onClick={sendComment}
+          >
             Reply
           </button>
         </div>

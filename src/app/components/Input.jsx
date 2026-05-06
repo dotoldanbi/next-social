@@ -90,7 +90,7 @@ export default function Input() {
         name: user.fullName,
         username: user.username,
         text,
-        profileImg: user.imageUrl,
+        profileImg: user.image_url,
         image: imageFileUrl,
       }),
     });
@@ -108,7 +108,7 @@ export default function Input() {
   return (
     <div className="flex border-b border-gray-200 p-3 space-x-3 w-full">
       <img
-        src={user.imageUrl}
+        src={user.image_url}
         alt="user-img"
         className="h-11 w-11 rounded-full cursor-pointer hover:brightness-95 object-cover"
       />
