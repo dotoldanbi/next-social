@@ -1,7 +1,42 @@
-import React from 'react'
+import React from "react";
+import Link from "next/link";
+import { HiArrowLeft } from "react-icons/hi";
 
-export default function SearchPage() {
+export default async function SearchPage({ params }) {
+  let data = null;
+  const searchTerm = await params.searchTerm;
+  try {
+    const result = await fetch(process.env.URL + "api/user/search", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ searchTerm }),
+      cache: "no-store",
+    });
+
+    data = await result.json();
+    console.log(data);
+  } catch (error) {
+    console.log("Error searching users:", error);
+  }
   return (
-    <div>Search Page</div>
-  )
+    <div>
+      <div className="flex items-center space-x-2 py-2 px-3 sticky top-0 z-50 bg-white border-b border-gray-200">
+        <Link href={"/"} className="hover:bg-gray-100 rounded-full p-2">
+          <HiArrowLeft className="h-5 w-5" />
+        </Link>
+        <h2 className="sm:text-lg">Back</h2>
+      </div>
+      <div className="border-b p-6">
+        <h1 className="text-xl font-bold">
+          Search results for &quot;{decodeURIComponent(searchTerm)}&quot;
+        </h1>
+      </div>
+
+      {data && data.length === 0 && (
+        <h2 className="text-center mt-5 text-lg">No users found</h2>
+      )}
+
+      {data && data.map((post) => <Post key={post._id} post={post} />)}
+    </div>
+  );
 }
